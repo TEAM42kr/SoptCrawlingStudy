@@ -1,3 +1,5 @@
+package org.sopt.crawlingstudy.example;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -15,24 +17,17 @@ public class Main {
 	public static void main(String[] args) throws IOException {
 		Set<String> linkList = new HashSet<>();
 
-		Document doc = Jsoup.connect("http://bbs.ruliweb.com/community/board/300143/read/35217996").get();
+		Document doc = Jsoup.connect("http://bbs.ruliweb.com/community/board/300143").get();
 		Elements elements = doc.getAllElements();
 		for (Element element : elements) {
 			Attributes attrs = element.attributes();
 			for (Attribute attr : attrs) {
 				if (attr.getValue().startsWith("http://")) {
-					int firstParamIndex = attr.getValue().indexOf('?');
-					if (firstParamIndex == -1) {
-						firstParamIndex = attr.getValue().length();
-					} else {
-						firstParamIndex = firstParamIndex - 1;
-					}
-					linkList.add(attr.getValue().substring(0, firstParamIndex));
+					linkList.add(removeHttpParam(attr.getValue()));
 				}
 			}
 			// System.out.println(element.tagName());
 		}
-		int count = 0;
 		for (String url : linkList) {
 			try {
 				Document doc2 = Jsoup.connect(url).get();
@@ -40,21 +35,34 @@ public class Main {
 				for (Element element : elements2) {
 					Attributes attrs = element.attributes();
 					for (Attribute attr : attrs) {
+						// URL이 "http://bbs.ruliweb.com/community/board/300143"로 시작하는 게시글(루리웹 유머게시판)만
+						// 수집하도록
 						if (attr.getValue().startsWith("http://bbs.ruliweb.com/community/board/300143/read/")) {
-							System.out.println(attr.getValue());
-
-							PrintWriter pw = new PrintWriter(new File(attr.getValue().replace("http://bbs.ruliweb.com/community/board/300143/read/", "")));
-							pw.println(doc2.toString());
-							pw.flush();
-							pw.close();
-							count++;
+							String subUrl = removeHttpParam(attr.getValue());
+							System.out.println(subUrl);
+							File htmlFile = new File(
+									subUrl.replace("http://bbs.ruliweb.com/community/board/300143/read/", ""));
+							if (!htmlFile.exists()) {
+								PrintWriter pw = new PrintWriter(htmlFile);
+								pw.println(Jsoup.connect(url).get().toString());
+								pw.flush();
+								pw.close();
+							}
 						}
 					}
 					// System.out.println(element.tagName());
 				}
 			} catch (Exception e) {
-				System.out.println("ERROR URL :: " + url);
+				// sSystem.out.println("ERROR URL :: " + url);
 			}
 		}
+	}
+
+	private static String removeHttpParam(String originalUrl) {
+		int firstParamIndex = originalUrl.indexOf('?');
+		if (firstParamIndex == -1) {
+			firstParamIndex = originalUrl.length();
+		}
+		return originalUrl.substring(0, firstParamIndex);
 	}
 }
