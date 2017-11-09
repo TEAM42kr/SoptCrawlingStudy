@@ -26,17 +26,17 @@ public class Main {
 					linkList.add(removeHttpParam(attr.getValue()));
 				}
 			}
-			// System.out.println(element.tagName());
 		}
 		for (String url : linkList) {
 			try {
+				// 1ì°¨ URLëª©ë¡ì„ ëª¨ë‘ ìˆœíšŒí•˜ë©´ì„œ 1ì°¨ëª©ë¡ë³„ 2ì°¨ëª©ë¡ì„ ì„ ë³„í•¨
 				Document doc2 = Jsoup.connect(url).get();
 				Elements elements2 = doc2.getAllElements();
 				for (Element element : elements2) {
 					Attributes attrs = element.attributes();
 					for (Attribute attr : attrs) {
-						// URLÀÌ "http://bbs.ruliweb.com/community/board/300143"·Î ½ÃÀÛÇÏ´Â °Ô½Ã±Û(·ç¸®À¥ À¯¸Ó°Ô½ÃÆÇ)¸¸
-						// ¼öÁıÇÏµµ·Ï
+						// 2ì°¨ëª©ë¡ì—ì„  URLì´ "http://bbs.ruliweb.com/community/board/300143"ë¡œ ì‹œì‘í•˜ëŠ” ê²Œì‹œê¸€(ë£¨ë¦¬ì›¹
+						// ìœ ë¨¸ê²Œì‹œíŒ)ë§Œ ìˆ˜ì§‘í•˜ë„ë¡
 						if (attr.getValue().startsWith("http://bbs.ruliweb.com/community/board/300143/read/")) {
 							String subUrl = removeHttpParam(attr.getValue());
 							System.out.println(subUrl);
@@ -50,10 +50,8 @@ public class Main {
 							}
 						}
 					}
-					// System.out.println(element.tagName());
 				}
 			} catch (Exception e) {
-				// sSystem.out.println("ERROR URL :: " + url);
 			}
 		}
 	}
